@@ -1,0 +1,71 @@
+---
+title: "hw3"
+output: github_document
+date: '2022-10-12'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(nycflights13)
+library(ggplot2)
+flights
+airports
+colnames(flights)
+colnames(airports)
+```
+
+#1
+```{r}
+t1 = flights %>% 
+  group_by(dest) %>% 
+  summarise(mean_delay = mean(dep_delay, na.rm = T))
+  
+
+
+t2 = airports %>%
+  semi_join(flights, c("faa" = "dest")) %>% 
+  left_join(t1, by = c("faa" = "dest"))
+
+ggplot(data = t2, aes(lon, lat, color = mean_delay)) +
+  borders("state") +
+  geom_point() +
+  coord_quickmap()
+  
+
+
+ 
+```
+
+#2
+```{r}
+t3 = airports %>% 
+  select("faa", "lat", "lon")
+
+t4 = flights %>% 
+  left_join(t3, by = c("dest" = "faa"))
+
+```
+
+#3
+```{r}
+t5 = planes %>% 
+  select("tailnum", "year")
+
+t6 = flights %>% 
+  semi_join(planes,by = "tailnum") %>% 
+  left_join(t5, by = "tailnum") %>% 
+  group_by(year.y) %>% 
+  summarise(mean_delay = mean(dep_delay, na.rm = T))
+
+ggplot(data = t6, aes(x = year.y, y = mean_delay))+
+  geom_point()
+
+
+```
+
+#Before year 1980 there is no clear pattern. From 1980 to about 2000, there is a positive correlation between the age of plane and its delay. From 2000 to current year, there is a negative correlation between the age of plane and its delay.
+
